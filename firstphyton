@@ -1,3 +1,226 @@
 #Display the output
 print ('New Phyton File') 
-https://jupyterlab-1-labs-prod-jupyterlab-us-east-0.labs.cognitiveclass.ai/user/bnebiyou/lab/tree/labs/PY0221EN/ETL_Engineer_Peer_Review_Assignment-Copy1.ipynb
+Peer Review Assignment - Data Engineer - ETL
+Estimated time needed: 20 minutes
+
+Objectives
+In this final part you will:
+
+Run the ETL process
+Extract bank and market cap data from the JSON file bank_market_cap.json
+Transform the market cap currency using the exchange rate data
+Load the transformed data into a seperate CSV
+For this lab, we are going to be using Python and several Python libraries. Some of these libraries might be installed in your lab environment or in SN Labs. Others may need to be installed by you. The cells below will install these libraries when executed.
+
+#!pip install glob
+#!pip install pandas
+#!pip install requests
+#!pip install datetime
+Imports
+Import any additional libraries you may need here.
+
+import glob
+import pandas as pd
+from datetime import datetime
+As the exchange rate fluctuates, we will download the same dataset to make marking simpler. This will be in the same format as the dataset you used in the last section
+
+!wget https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-PY0221EN-SkillsNetwork/labs/module%206/Lab%20-%20Extract%20Transform%20Load/data/bank_market_cap_1.json
+!wget https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-PY0221EN-SkillsNetwork/labs/module%206/Lab%20-%20Extract%20Transform%20Load/data/bank_market_cap_2.json
+!wget https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-PY0221EN-SkillsNetwork/labs/module%206/Final%20Assignment/exchange_rates.csv
+--2023-05-21 16:49:37--  https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-PY0221EN-SkillsNetwork/labs/module%206/Lab%20-%20Extract%20Transform%20Load/data/bank_market_cap_1.json
+Resolving cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud (cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud)... 169.63.118.104
+Connecting to cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud (cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud)|169.63.118.104|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 2815 (2.7K) [application/json]
+Saving to: ‘bank_market_cap_1.json’
+
+bank_market_cap_1.j 100%[===================>]   2.75K  --.-KB/s    in 0s      
+
+2023-05-21 16:49:38 (11.4 MB/s) - ‘bank_market_cap_1.json’ saved [2815/2815]
+
+--2023-05-21 16:49:39--  https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-PY0221EN-SkillsNetwork/labs/module%206/Lab%20-%20Extract%20Transform%20Load/data/bank_market_cap_2.json
+Resolving cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud (cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud)... 169.63.118.104
+Connecting to cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud (cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud)|169.63.118.104|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 1429 (1.4K) [application/json]
+Saving to: ‘bank_market_cap_2.json’
+
+bank_market_cap_2.j 100%[===================>]   1.40K  --.-KB/s    in 0s      
+
+2023-05-21 16:49:39 (8.32 MB/s) - ‘bank_market_cap_2.json’ saved [1429/1429]
+
+--2023-05-21 16:49:41--  https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-PY0221EN-SkillsNetwork/labs/module%206/Final%20Assignment/exchange_rates.csv
+Resolving cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud (cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud)... 169.63.118.104
+Connecting to cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud (cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud)|169.63.118.104|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 590 [text/csv]
+Saving to: ‘exchange_rates.csv’
+
+exchange_rates.csv  100%[===================>]     590  --.-KB/s    in 0s      
+
+2023-05-21 16:49:41 (3.58 MB/s) - ‘exchange_rates.csv’ saved [590/590]
+
+Extract
+JSON Extract Function
+This function will extract JSON files.
+
+def extract_from_json(file_to_process):
+    dataframe = pd.read_json(file_to_process)
+    dataframe.head
+    #bn=pd.DataFrame(dataframe.columns.value.tolist())['pound_rate']
+   # pd.DataFrame.from_records(bn).head
+  #  resp=requests.get(url="file_to_process")
+    #dff=pd.json_normalize(dataframe,record_path=['Name'])
+    return dataframe
+Extract Function
+Define the extract function that finds JSON file bank_market_cap_1.json and calls the function created above to extract data from them. Store the data in a pandas dataframe. Use the following list for the columns.
+
+columns=['Name','Market Cap (US$ Billion)']
+def extract():
+    # Write your code here
+    extracted_data = pd.DataFrame(columns=['Name','Market Cap (US$ Billion)'])
+    
+    # Process json file
+    for jsonfile in glob.glob("*.json"):
+        extracted_data = extracted_data.append(extract_from_json(jsonfile), ignore_index=True)
+        
+    return extracted_data
+Question 1 Load the file exchange_rates.csv as a dataframe and find the exchange rate for British pounds with the symbol GBP, store it in the variable exchange_rate, you will be asked for the number. Hint: set the parameter index_col to 0.
+
+#log("Extract phase Started")
+extracted_data = extract()
+#log("Extract phase Ended")
+extracted_data
+​
+Name	Market Cap (US$ Billion)
+0	JPMorgan Chase	390.934
+1	Industrial and Commercial Bank of China	345.214
+2	Bank of America	325.331
+3	Wells Fargo	308.013
+4	China Construction Bank	257.399
+...	...	...
+100	Ping An Bank	37.993
+101	Standard Chartered	37.319
+102	United Overseas Bank	35.128
+103	QNB Group	33.560
+104	Bank Rakyat	33.081
+105 rows × 2 columns
+
+Transform
+Using exchange_rate and the exchange_rates.csv file find the exchange rate of USD to GBP. Write a transform function that
+
+Changes the Market Cap (US$ Billion) column from USD to GBP
+Rounds the Market Cap (US$ Billion)` column to 3 decimal places
+Rename Market Cap (US$ Billion) to Market Cap (GBP$ Billion)
+def transform(data):
+    # Write your code here
+    data['Market Cap (US$ Billion)'] = round(0.75 * data['Market Cap (US$ Billion)'], 3)
+    data.rename(columns={'Market Cap (US$ Billion)': 'Market Cap (GBP$ Billion)'}, inplace=True)
+    return data
+​
+transformed_data = transform(extracted_data)
+transformed_data
+Name	Market Cap (GBP$ Billion)
+0	JPMorgan Chase	293.201
+1	Industrial and Commercial Bank of China	258.910
+2	Bank of America	243.998
+3	Wells Fargo	231.010
+4	China Construction Bank	193.049
+...	...	...
+100	Ping An Bank	28.495
+101	Standard Chartered	27.989
+102	United Overseas Bank	26.346
+103	QNB Group	25.170
+104	Bank Rakyat	24.811
+105 rows × 2 columns
+
+Load
+Create a function that takes a dataframe and load it to a csv named bank_market_cap_gbp.csv. Make sure to set index to False.
+
+def load(target_file, data_to_load):
+    # Write your code here
+    data_to_load.to_csv(target_file, index=False) 
+Logging Function
+Write the logging function log to log your data:
+
+def log(message):
+    # Write your code here
+    timestamp_format = '%Y-%h-%d-%H:%M:%S' # Year-Monthname-Day-Hour-Minute-Second
+    now = datetime.now() # get current timestamp
+    timestamp = now.strftime(timestamp_format)
+    with open("logfile.txt","a") as f:
+        f.write(timestamp + ',' + message + '\n')
+Running the ETL Process
+Log the process accordingly using the following "ETL Job Started" and "Extract phase Started"
+
+log("ETL Job Started")
+log("Extract phase Started")
+​
+Extract
+Question 2 Use the function extract, and print the first 5 rows, take a screen shot:
+
+()
+extracted_data = extract()
+# Print the rows here
+extracted_data.head()
+​
+Name	Market Cap (US$ Billion)
+0	JPMorgan Chase	390.934
+1	Industrial and Commercial Bank of China	345.214
+2	Bank of America	325.331
+3	Wells Fargo	308.013
+4	China Construction Bank	257.399
+Log the data as "Extract phase Ended"
+
+log("Extract phase Ended")
+​
+​
+Transform
+Log the following "Transform phase Started"
+
+log("Transform phase Started")
+​
+Question 3 Use the function transform and print the first 5 rows of the output, take a screen shot:
+
+# Call the function here
+transformed_data = transform(extracted_data)
+# Print the first 5 rows here
+transformed_data.head()
+​
+Name	Market Cap (GBP$ Billion)
+0	JPMorgan Chase	293.201
+1	Industrial and Commercial Bank of China	258.910
+2	Bank of America	243.998
+3	Wells Fargo	231.010
+4	China Construction Bank	193.049
+Log your data "Transform phase Ended"
+
+log("Extract phase Ended")
+​
+Load
+Log the following "Load phase Started".
+
+​
+log("Transform phase Started")
+​
+Call the load function
+
+log("Load phase Started")
+​
+Log the following "Load phase Ended".
+
+log("Transform phase Ended")
+​
+Authors
+Ramesh Sannareddy, Joseph Santrcangelo and Azim Hirjani
+
+Other Contributors
+Rav Ahuja
+
+Change Log
+Date (YYYY-MM-DD)	Version	Changed By	Change Description
+2020-11-25	0.1	Ramesh Sannareddy	Created initial version of the lab
+Copyright © 2020 IBM Corporation. This notebook and its source code are released under the terms of the MIT License.
+
+
+
